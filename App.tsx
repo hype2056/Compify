@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sender, Message, MathSolution, SimilarProblem } from './types';
-import { solveMathProblem } from './services/geminiService';
-import LatexRenderer from './components/LatexRenderer';
-import ProblemCard from './components/ProblemCard';
-import PracticeModal from './components/PracticeModal';
+import { solveMathProblem } from './geminiService';
+import LatexRenderer from './LatexRenderer';
+import ProblemCard from './ProblemCard';
+import PracticeModal from './PracticeModal';
 import { 
   PaperAirplaneIcon, 
   PhotoIcon, 

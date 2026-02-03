@@ -1,0 +1,7 @@
+{
+  "name": "Compify!",
+  "description": "An Agentic RAG-powered math solver using Gemini 3 Flash Thinking to solve complex problems and retrieve similar competition questions.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

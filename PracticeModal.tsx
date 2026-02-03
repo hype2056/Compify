@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SimilarProblem, VerificationResult } from '../types';
 import LatexRenderer from './LatexRenderer';
-import { verifySolution } from '../services/geminiService';
+import { verifySolution } from '../geminiService';
 import { XMarkIcon, CheckCircleIcon, XCircleIcon, BeakerIcon } from '@heroicons/react/24/outline';
 
 interface PracticeModalProps {

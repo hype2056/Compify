@@ -2,17 +2,7 @@ import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { MathSolution, VerificationResult } from '../types';
 
 // Initialize Gemini Client
-const apiKey =
-  import.meta.env.VITE_GEMINI_API_KEY ||
-  import.meta.env.VITE_API_KEY;
-
-if (!apiKey) {
-  throw new Error(
-    "Missing Gemini API key. Set VITE_GEMINI_API_KEY in your environment."
-  );
-}
-
-const ai = new GoogleGenAI({ apiKey });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Define the structured schema for the response
 const similarProblemSchema: Schema = {

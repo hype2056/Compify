@@ -109,7 +109,7 @@ const PracticeModal: React.FC<PracticeModalProps> = ({ problem, onClose }) => {
                <button
                  onClick={handleVerify}
                  disabled={isVerifying || !userSolution.trim()}
-                 className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white font-medium py-2.5 px-6 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:shadow-indigo-500/25 active:scale-95"
+                 className="glass-btn text-white font-medium py-2.5 px-6 flex items-center gap-2"
                >
                  {isVerifying ? (
                    <>

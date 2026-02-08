@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<SimilarProblem | null>(null);
+  const [sendAnim, setSendAnim] = useState<'idle' | 'flying' | 'returned'>('idle');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -46,6 +47,13 @@ const App: React.FC = () => {
 
   const handleSend = async () => {
     if ((!input.trim() && !image) || isLoading) return;
+
+    // Trigger fly animation
+    setSendAnim('flying');
+    setTimeout(() => {
+      setSendAnim('returned');
+      setTimeout(() => setSendAnim('idle'), 400);
+    }, 600);
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -89,13 +97,15 @@ const App: React.FC = () => {
     }
   };
 
+  const sendBtnClass = sendAnim === 'flying' ? 'send-flying' : sendAnim === 'returned' ? 'send-returned' : '';
+
   return (
     <div className="flex flex-col h-screen text-slate-100 font-sans overflow-hidden relative">
       {/* Floating Math Symbols Background */}
       <FloatingSymbols />
 
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 glass-strong border-b border-white/5 shadow-lg z-10">
+      <header className="flex items-center justify-between px-6 py-4 glass-header z-10">
         <div className="flex items-center gap-3">
           <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
             <BeakerIcon className="w-6 h-6 text-white" />
@@ -107,7 +117,7 @@ const App: React.FC = () => {
             <p className="text-xs text-slate-400">Powered by Gemini 3 Flash Preview & Agentic RAG</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs font-medium text-emerald-400 glass px-3 py-1.5 rounded-full border border-emerald-500/20">
+        <div className="flex items-center gap-2 text-xs font-medium text-emerald-400 glass px-3 py-1.5 rounded-full">
            <CpuChipIcon className="w-4 h-4" />
            <span>Thinking Mode: Active</span>
         </div>
@@ -123,7 +133,7 @@ const App: React.FC = () => {
           <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 scroller">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full opacity-60 space-y-5">
-                <div className="w-28 h-28 rounded-2xl glass-strong flex items-center justify-center shadow-lg shadow-indigo-500/10 gradient-border" style={{ animationDuration: '3s' }}>
+                <div className="w-28 h-28 rounded-2xl glass-strong flex items-center justify-center shadow-lg shadow-indigo-500/10">
                   <AcademicCapIcon className="w-14 h-14 text-indigo-400" />
                 </div>
                 <h2 className="text-2xl font-bold shimmer-text">Ready to Compete?</h2>
@@ -139,7 +149,7 @@ const App: React.FC = () => {
 
                 {/* User Message Bubble */}
                 {msg.sender === Sender.USER && (
-                  <div className="glass-strong rounded-2xl rounded-tr-sm px-5 py-3 max-w-[80%] shadow-lg hover-glow transition-all duration-300 gradient-border">
+                  <div className="glass-strong rounded-2xl rounded-tr-sm px-5 py-3 max-w-[80%] shadow-lg hover-glow transition-all duration-300">
                     {msg.image && (
                       <img src={msg.image} alt="User upload" className="max-h-48 rounded-lg mb-3 border border-white/10" />
                     )}
@@ -152,9 +162,9 @@ const App: React.FC = () => {
                   <div className="w-full max-w-6xl mx-auto space-y-8 animate-fade-in">
 
                     {/* Solution Container */}
-                    <div className="glass-strong rounded-xl overflow-hidden shadow-2xl hover-glow transition-all duration-500 gradient-border">
+                    <div className="glass-strong rounded-xl overflow-hidden shadow-2xl hover-glow transition-all duration-500">
 
-                      <div className="glass px-6 py-3 border-b border-white/5 flex items-center gap-2">
+                      <div className="glass px-6 py-3 flex items-center gap-2" style={{ borderRadius: 0, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                         <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
                         <h2 className="font-semibold text-slate-200">Analysis & Solution</h2>
                       </div>
@@ -163,7 +173,7 @@ const App: React.FC = () => {
 
                         {/* 1. OCR Section */}
                         {msg.solution.originalProblemOCR && (
-                           <div className="p-4 glass rounded-lg relative group">
+                           <div className="p-4 glass relative group">
                              <div className="flex items-center gap-2 mb-2 text-slate-500">
                                <DocumentMagnifyingGlassIcon className="w-4 h-4" />
                                <p className="text-xs uppercase tracking-wide font-bold">Transcription</p>
@@ -186,7 +196,7 @@ const App: React.FC = () => {
                         {/* 3. Final Answer */}
                         <div className="mt-4 pt-6 border-t border-white/5 flex items-center justify-between">
                           <p className="text-sm text-slate-400 font-medium">Final Answer</p>
-                          <div className="px-8 py-4 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 glass rounded-xl text-2xl font-bold text-indigo-200 shadow-[0_0_30px_rgba(99,102,241,0.15)] gradient-border">
+                          <div className="px-8 py-4 glass rounded-xl text-2xl font-bold text-indigo-200 shadow-[0_0_30px_rgba(99,102,241,0.15)]">
                              <LatexRenderer content={msg.solution.finalAnswer} />
                           </div>
                         </div>
@@ -219,7 +229,7 @@ const App: React.FC = () => {
                 )}
 
                 {msg.sender === Sender.AI && msg.text && (
-                  <div className="glass rounded-xl px-4 py-3 border border-red-500/20 text-red-200">
+                  <div className="glass px-4 py-3 text-red-200">
                     {msg.text}
                   </div>
                 )}
@@ -230,7 +240,7 @@ const App: React.FC = () => {
             {/* Loading Indicator */}
             {isLoading && (
               <div className="flex items-start max-w-md animate-slide-up">
-                <div className="glass-strong rounded-xl px-6 py-5 flex items-center gap-4 shadow-lg gradient-border">
+                <div className="glass-strong rounded-xl px-6 py-5 flex items-center gap-4 shadow-lg">
                   <div className="relative w-6 h-6">
                     <div className="absolute inset-0 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
                     <div className="absolute inset-2 bg-indigo-500 rounded-full animate-pulse"></div>
@@ -252,7 +262,7 @@ const App: React.FC = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 glass-strong border-t border-white/5 z-20">
+          <div className="p-4 glass-input z-20">
             <div className="max-w-4xl mx-auto flex flex-col gap-3">
               {image && (
                 <div className="relative inline-block w-fit group animate-slide-up">
@@ -276,10 +286,10 @@ const App: React.FC = () => {
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-3 text-slate-400 hover:text-indigo-400 glass hover:border-indigo-500/30 rounded-xl transition-all duration-300 hover-glow"
+                  className="p-3 text-slate-400 hover:text-indigo-400 glass-btn"
                   title="Upload Image"
                 >
-                  <PhotoIcon className="w-6 h-6" />
+                  <PhotoIcon className="w-6 h-6 relative z-10" />
                 </button>
                 <div className="flex-1 relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/30 to-cyan-500/30 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
@@ -288,15 +298,23 @@ const App: React.FC = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Type a math problem or upload an image..."
-                    className="relative w-full glass border-white/5 text-slate-200 placeholder-slate-500 rounded-xl py-3 pl-4 pr-12 focus:ring-1 focus:ring-indigo-500/50 resize-none h-[52px] leading-[28px] shadow-inner"
+                    className="relative w-full text-slate-200 placeholder-slate-500 py-3 pl-4 pr-14 focus:ring-1 focus:ring-indigo-500/50 resize-none h-[52px] leading-[28px]"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(20px) saturate(150%)',
+                      WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      borderRadius: '16px',
+                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                    }}
                     rows={1}
                   />
                   <button
                     onClick={handleSend}
                     disabled={isLoading || (!input && !image)}
-                    className="absolute right-2 top-1.5 p-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 text-white rounded-lg transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95"
+                    className={`absolute right-2 top-1.5 p-2.5 glass-btn text-white ${sendBtnClass}`}
                   >
-                    <PaperAirplaneIcon className="w-5 h-5" />
+                    <PaperAirplaneIcon className="w-5 h-5 relative z-10 plane-icon" />
                   </button>
                 </div>
               </div>

@@ -34,7 +34,7 @@ const similarProblemSchema: Schema = {
   properties: {
     title: { type: Type.STRING, description: "A short title for the problem" },
     source: { type: Type.STRING, description: "The origin of the problem (e.g., AMC 12B 2021, Problem 15)" },
-    problemText: { type: Type.STRING, description: "The full, verbatim problem statement." },
+    problemText: { type: Type.STRING, description: "The full, verbatim problem statement. Do not provide hints or solutions." },
     similarityLogic: { type: Type.STRING, description: "Explain the shared mathematical concept, theorem, or trick (e.g., 'Both use Power of a Point') that makes this problem relevant." },
     difficulty: { type: Type.STRING, description: "Difficulty rating (e.g., 1-10 or Easy/Medium/Hard)" },
   },
@@ -100,7 +100,7 @@ export const solveMathProblem = async (
       1. TRANSCRIPTION: If an image is provided, accurately transcribe the math notation using LaTeX.
       2. SOLUTION: Provide a rigorous, step-by-step solution. Ensure this field is NEVER empty. Explain every step clearly.
       3. RETRIEVAL: Retrieve 3 similar problems from the AOPS dataset.
-      
+      For each similar problem, include the complete problem statement in problemText (no hints or solutions). If you cannot recall the exact statement, return "Problem statement unavailable." instead of leaving it blank.
       Output strictly in JSON format matching the provided schema.
       `
     });

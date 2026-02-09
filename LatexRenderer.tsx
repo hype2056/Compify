@@ -9,6 +9,11 @@ const LatexRenderer: React.FC<LatexRendererProps> = ({ content, className }) => 
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const normalizeDelimiters = (text: string) =>
+      text
+        .replace(/\\\[((?:.|\n)*?)\\\]/g, (_, equation) => `$$${equation}$$`)
+        .replace(/\\\((.*?)\\\)/g, (_, equation) => `$${equation}$`);
+
     const renderMath = (text: string) => {
         const element = containerRef.current;
         if (!element || !(window as any).katex) return;
@@ -17,7 +22,7 @@ const LatexRenderer: React.FC<LatexRendererProps> = ({ content, className }) => 
         element.innerHTML = '';
 
         // Split by $$ for blocks
-        const parts = text.split('$$');
+        const parts = normalizeDelimiters(text).split('$$');
         
         parts.forEach((part, index) => {
             if (index % 2 === 1) {

@@ -136,7 +136,69 @@ export const solveMathProblem = async (
     });
 
     if (!response.text) throw new Error("No response generated.");
-    return JSON.parse(response.text) as MathSolution;
+    const rawSolution = JSON.parse(response.text) as Partial<MathSolution> & {
+      [key: string]: unknown;
+    };
+
+    const normalizeText = (value: unknown, fallback: string) =>
+      typeof value === 'string' && value.trim() ? value : fallback;
+
+    const normalizeSimilarProblem = (problem: SimilarProblemLike) => ({
+      title: normalizeText(
+        (problem as SimilarProblemLike).title ?? (problem as SimilarProblemLike).problemTitle,
+        'Practice Problem'
+      ),
+      source: normalizeText(
+        (problem as SimilarProblemLike).source ?? (problem as SimilarProblemLike).origin,
+        'AOPS'
+      ),
+      problemText: normalizeText(
+        (problem as SimilarProblemLike).problemText ??
+          (problem as SimilarProblemLike).problem_statement ??
+          (problem as SimilarProblemLike).problem ??
+          (problem as SimilarProblemLike).statement,
+        'Problem statement unavailable.'
+      ),
+      similarityLogic: normalizeText(
+        (problem as SimilarProblemLike).similarityLogic ??
+          (problem as SimilarProblemLike).similarity ??
+          (problem as SimilarProblemLike).sharedConcept ??
+          (problem as SimilarProblemLike).concept,
+        'Related concept.'
+      ),
+      difficulty: normalizeText(
+        (problem as SimilarProblemLike).difficulty ?? (problem as SimilarProblemLike).level,
+        'Unknown'
+      ),
+    });
+
+    const similarProblemsInput = Array.isArray(rawSolution.similarProblems)
+      ? rawSolution.similarProblems
+      : [];
+
+    return {
+      originalProblemOCR: normalizeText(
+        (rawSolution as SolutionLike).originalProblemOCR ??
+          (rawSolution as SolutionLike).transcription,
+        ''
+      ),
+      stepByStepSolution: normalizeText(
+        (rawSolution as SolutionLike).stepByStepSolution ??
+          (rawSolution as SolutionLike).solution ??
+          (rawSolution as SolutionLike).stepByStep ??
+          (rawSolution as SolutionLike).proof,
+        'Solution unavailable.'
+      ),
+      finalAnswer: normalizeText(
+        (rawSolution as SolutionLike).finalAnswer ??
+          (rawSolution as SolutionLike).answer ??
+          (rawSolution as SolutionLike).final,
+        'Answer unavailable.'
+      ),
+      similarProblems: similarProblemsInput.map((problem) =>
+        normalizeSimilarProblem(problem as SimilarProblemLike)
+      ),
+    };
 
   } catch (error) {
     console.error("Error in solveMathProblem:", error);

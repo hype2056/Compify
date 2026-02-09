@@ -93,7 +93,11 @@ const App: React.FC = () => {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: Sender.AI,
-        solution: solution,
+        solution: {
+          ...solution,
+          originalProblemOCR:
+            solution.originalProblemOCR?.trim() ? solution.originalProblemOCR : userMessage.text,
+        },
       };
 
       setMessages((prev) => [...prev, aiMessage]);

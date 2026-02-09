@@ -22,6 +22,9 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<SimilarProblem | null>(null);
   const [sendAnim, setSendAnim] = useState<'idle' | 'flying' | 'returned'>('idle');
+  const [apiKey, setApiKey] = useState(() =>
+    typeof window !== 'undefined' ? window.localStorage.getItem('COMPIFY_GEMINI_API_KEY') ?? '' : ''
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -33,6 +36,13 @@ const App: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('COMPIFY_GEMINI_API_KEY', apiKey);
+      (window as typeof window & { GEMINI_API_KEY?: string }).GEMINI_API_KEY = apiKey || undefined;
+    }
+  }, [apiKey]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -121,9 +131,21 @@ const App: React.FC = () => {
             <p className="text-xs text-slate-400">Powered by Gemini 3 Flash Preview & Agentic RAG</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs font-medium text-emerald-400 glass px-3 py-1.5 rounded-full">
-           <CpuChipIcon className="w-4 h-4" />
-           <span>Thinking Mode: Active</span>
+        <div className="flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-2 glass px-3 py-1.5 rounded-full">
+            <span className="text-xs text-slate-400">Gemini API Key</span>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="Paste key"
+              className="bg-transparent text-xs text-slate-100 placeholder-slate-500 focus:outline-none w-48"
+            />
+          </div>
+          <div className="flex items-center gap-2 text-xs font-medium text-emerald-400 glass px-3 py-1.5 rounded-full">
+             <CpuChipIcon className="w-4 h-4" />
+             <span>Thinking Mode: Active</span>
+          </div>
         </div>
       </header>
 

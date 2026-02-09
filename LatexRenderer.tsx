@@ -9,6 +9,18 @@ const LatexRenderer: React.FC<LatexRendererProps> = ({ content, className }) => 
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const renderPlainText = (text: string) => {
+      const element = containerRef.current;
+      if (!element) return;
+      element.innerHTML = '';
+      const lines = text.split('\n');
+      lines.forEach((line, index) => {
+        element.appendChild(document.createTextNode(line));
+        if (index < lines.length - 1) {
+          element.appendChild(document.createElement('br'));
+        }
+      });
+    };
     const normalizeDelimiters = (text: string) =>
       text
         .replace(/\\\[((?:.|\n)*?)\\\]/g, (_, equation) => `$$${equation}$$`)
@@ -69,6 +81,7 @@ const LatexRenderer: React.FC<LatexRendererProps> = ({ content, className }) => 
     if ((window as any).katex) {
         renderMath(content);
     } else {
+        renderPlainText(content);
         // Retry logic for when script loads asynchronously
         const interval = setInterval(() => {
              if ((window as any).katex) {

@@ -79,10 +79,14 @@ const App: React.FC = () => {
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error(error);
+       const messageText =
+        error instanceof Error && error.message
+          ? error.message
+          : "I encountered an error solving this problem. Please try again with a clearer image or description.";
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: Sender.AI,
-        text: "I encountered an error solving this problem. Please try again with a clearer image or description.",
+        text: "messageText",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

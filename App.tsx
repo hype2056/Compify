@@ -96,7 +96,7 @@ const App: React.FC = () => {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: Sender.AI,
-        text: "Please enter the API key in the box above: AIzaSyCcPra-vkQGOgUBDo9PMPP_8VfJOu8Ly_U",
+        text: "messageText",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

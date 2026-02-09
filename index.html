@@ -199,6 +199,112 @@
         box-shadow: 0 0 20px rgba(129, 140, 248, 0.15), 0 0 40px rgba(129, 140, 248, 0.05);
       }
 
+      /* === FIRE ANIMATION === */
+      .fire-container {
+        width: 40px;
+        height: 48px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .fire-container svg {
+        width: 100%;
+        height: 100%;
+      }
+      .flame {
+        animation-name: flamefly;
+        animation-duration: 2s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        opacity: 0;
+        transform-origin: 50% 50% 0;
+      }
+      .flame.one {
+        animation-delay: 1s;
+        animation-duration: 3s;
+      }
+      .flame.two {
+        animation-duration: 5s;
+        animation-delay: 1s;
+      }
+      .flame-main {
+        animation-name: flameWobble;
+        animation-duration: 3s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+      }
+      .flame-main.one {
+        animation-duration: 4s;
+        animation-delay: 1s;
+      }
+      .flame-main.two {
+        animation-duration: 3s;
+        animation-delay: 2s;
+      }
+      .flame-main.three {
+        animation-duration: 2.1s;
+        animation-delay: 3s;
+      }
+      .flame-main.four {
+        animation-duration: 3.2s;
+        animation-delay: 4s;
+      }
+      .flame-main.five {
+        animation-duration: 2.5s;
+        animation-delay: 5s;
+      }
+      @keyframes flameWobble {
+        50% {
+          transform: scale(1, 1.2) translate(0, -4px) rotate(-2deg);
+        }
+      }
+      @keyframes flamefly {
+        0% {
+          transform: translate(0) rotate(180deg);
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          transform: translate(-4px, -18px) rotate(180deg);
+          opacity: 0;
+        }
+      }
+
+      .streak-badge {
+        font-weight: 700;
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        white-space: nowrap;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      }
+      .streak-red {
+        background: rgba(239, 68, 68, 0.25);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+      }
+      .streak-blue {
+        background: rgba(59, 130, 246, 0.25);
+        color: #93c5fd;
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+      }
+      .streak-green {
+        background: rgba(34, 197, 94, 0.25);
+        color: #86efac;
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+      }
+      .streak-purple {
+        background: rgba(168, 85, 247, 0.25);
+        color: #d8b4fe;
+        border: 1px solid rgba(168, 85, 247, 0.4);
+        box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+      }
+
       /* Custom scrollbar */
       .scroller::-webkit-scrollbar {
         width: 6px;

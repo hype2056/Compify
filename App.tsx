@@ -5,6 +5,7 @@ import LatexRenderer from './LatexRenderer';
 import ProblemCard from './ProblemCard';
 import PracticeModal from './PracticeModal';
 import FloatingSymbols from './FloatingSymbols';
+import FireAnimation from './FireAnimation';
 import {
   PaperAirplaneIcon,
   PhotoIcon,
@@ -22,9 +23,18 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<SimilarProblem | null>(null);
   const [sendAnim, setSendAnim] = useState<'idle' | 'flying' | 'returned'>('idle');
+  const [streak, setStreak] = useState(0);
   const [apiKey, setApiKey] = useState(() =>
     typeof window !== 'undefined' ? window.localStorage.getItem('COMPIFY_GEMINI_API_KEY') ?? '' : ''
   );
+
+  const handleStreakUpdate = (correct: boolean) => {
+    if (correct) {
+      setStreak((prev) => prev + 1);
+    } else {
+      setStreak(0);
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -36,7 +46,7 @@ const App: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
-  
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('COMPIFY_GEMINI_API_KEY', apiKey);
@@ -96,7 +106,7 @@ const App: React.FC = () => {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: Sender.AI,
-        text: "messageText",
+        text: messageText,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -302,7 +312,8 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 items-center">
+                 <FireAnimation streak={streak} />
                  <input
                   type="file"
                   ref={fileInputRef}
@@ -355,6 +366,7 @@ const App: React.FC = () => {
         <PracticeModal
           problem={selectedProblem}
           onClose={() => setSelectedProblem(null)}
+          onResult={handleStreakUpdate}
         />
       )}
 

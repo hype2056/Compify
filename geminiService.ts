@@ -1,5 +1,25 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { MathSolution, VerificationResult } from './types';
+type SolutionLike = Partial<MathSolution> & {
+  [key: string]: unknown;
+};
+
+type SimilarProblemLike = {
+  title?: unknown;
+  problemTitle?: unknown;
+  source?: unknown;
+  origin?: unknown;
+  problemText?: unknown;
+  problem_statement?: unknown;
+  problem?: unknown;
+  statement?: unknown;
+  similarityLogic?: unknown;
+  similarity?: unknown;
+  sharedConcept?: unknown;
+  concept?: unknown;
+  difficulty?: unknown;
+  level?: unknown;
+};
 
 const resolveApiKey = (): string | undefined => {
   const metaEnv = (typeof import.meta !== 'undefined' ? import.meta.env : undefined) ?? {};

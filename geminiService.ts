@@ -3,7 +3,10 @@ import { MathSolution, VerificationResult } from './types';
 
 const resolveApiKey = (): string | undefined => {
   const metaEnv = (typeof import.meta !== 'undefined' ? import.meta.env : undefined) ?? {};
-  const viteKey = metaEnv.VITE_GEMINI_API_KEY || metaEnv.VITE_API_KEY;
+  const viteKey =
+    metaEnv.VITE_GEMINI_API_KEY ||
+    metaEnv.VITE_API_KEY ||
+    metaEnv.GEMINI_API_KEY;
   const processKey =
     typeof process !== 'undefined' && process.env
       ? process.env.API_KEY || process.env.GEMINI_API_KEY

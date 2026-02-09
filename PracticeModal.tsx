@@ -7,9 +7,10 @@ import { XMarkIcon, CheckCircleIcon, XCircleIcon, BeakerIcon } from '@heroicons/
 interface PracticeModalProps {
   problem: SimilarProblem;
   onClose: () => void;
+  onResult?: (correct: boolean) => void;
 }
 
-const PracticeModal: React.FC<PracticeModalProps> = ({ problem, onClose }) => {
+const PracticeModal: React.FC<PracticeModalProps> = ({ problem, onClose, onResult }) => {
   const [userSolution, setUserSolution] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
@@ -20,6 +21,7 @@ const PracticeModal: React.FC<PracticeModalProps> = ({ problem, onClose }) => {
     try {
       const data = await verifySolution(problem.problemText, userSolution);
       setResult(data);
+      onResult?.(data.isCorrect);
     } catch (e) {
       console.error(e);
     } finally {

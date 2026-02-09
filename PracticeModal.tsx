@@ -14,6 +14,7 @@ const PracticeModal: React.FC<PracticeModalProps> = ({ problem, onClose, onResul
   const [userSolution, setUserSolution] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
+  const problemStatement = problem.problemText?.trim() || 'Problem statement unavailable.';
 
   const handleVerify = async () => {
     if (!userSolution.trim()) return;
@@ -53,8 +54,11 @@ const PracticeModal: React.FC<PracticeModalProps> = ({ problem, onClose, onResul
             <div>
               <h3 className="text-sm uppercase tracking-wider text-slate-500 font-bold mb-2">Problem Statement</h3>
               <div className="glass p-5 rounded-xl text-lg leading-relaxed shadow-inner">
-                <LatexRenderer content={problem.problemText} />
+                <LatexRenderer content={problemStatement} />
               </div>
+              <p className="mt-2 text-xs text-slate-500">
+                {problem.source} • Difficulty: {problem.difficulty}
+              </p>
             </div>
 
             {!result && (

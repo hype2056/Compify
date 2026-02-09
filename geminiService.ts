@@ -67,6 +67,7 @@ export const solveMathProblem = async (
   base64Image?: string
 ): Promise<MathSolution> => {
   try {
+    const ai = getClient();
     const parts: any[] = [];
 
     if (base64Image) {
@@ -124,6 +125,7 @@ export const verifySolution = async (
   userSolution: string
 ): Promise<VerificationResult> => {
   try {
+    const ai = getClient();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: {

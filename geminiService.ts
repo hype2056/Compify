@@ -1,8 +1,28 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { MathSolution, VerificationResult } from './types';
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const resolveApiKey = (): string | undefined => {
+  const metaEnv = (typeof import.meta !== 'undefined' ? import.meta.env : undefined) ?? {};
+  const viteKey = metaEnv.VITE_GEMINI_API_KEY || metaEnv.VITE_API_KEY;
+  const processKey =
+    typeof process !== 'undefined' && process.env
+      ? process.env.API_KEY || process.env.GEMINI_API_KEY
+      : undefined;
+  const windowKey =
+    typeof window !== 'undefined' ? (window as typeof window & { GEMINI_API_KEY?: string }).GEMINI_API_KEY : undefined;
+
+  return viteKey || processKey || windowKey;
+};
+
+const getClient = () => {
+  const apiKey = resolveApiKey();
+  if (!apiKey) {
+    throw new Error(
+      'Missing Gemini API key. Set VITE_GEMINI_API_KEY (Vite) or GEMINI_API_KEY (runtime) before calling the API.'
+    );
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 // Define the structured schema for the response
 const similarProblemSchema: Schema = {

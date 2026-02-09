@@ -1,5 +1,5 @@
 import React from 'react';
-import { SimilarProblem } from '../types';
+import { SimilarProblem } from './types';
 import LatexRenderer from './LatexRenderer';
 
 interface ProblemCardProps {

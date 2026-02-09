@@ -9,6 +9,7 @@ interface ProblemCardProps {
 }
 
 const ProblemCard: React.FC<ProblemCardProps> = ({ problem, index, onClick }) => {
+  const problemStatement = problem.problemText?.trim() || 'Problem statement unavailable.';
   return (
     <div
       onClick={() => onClick(problem)}
@@ -28,7 +29,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ problem, index, onClick }) =>
 
       {/* Problem Text */}
       <div className="text-sm text-slate-300 mb-4 glass p-4 rounded-lg flex-grow relative z-10 group-hover:border-indigo-500/20 transition-colors duration-300">
-        <LatexRenderer content={problem.problemText} />
+        <LatexRenderer content={problemStatement} />
       </div>
 
       <div className="mt-auto relative z-10">

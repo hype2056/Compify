@@ -13,8 +13,10 @@ const resolveApiKey = (): string | undefined => {
       : undefined;
   const windowKey =
     typeof window !== 'undefined' ? (window as typeof window & { GEMINI_API_KEY?: string }).GEMINI_API_KEY : undefined;
+  const storageKey =
+    typeof window !== 'undefined' ? window.localStorage.getItem('COMPIFY_GEMINI_API_KEY') ?? undefined : undefined;
 
-  return viteKey || processKey || windowKey;
+  return storageKey || windowKey || viteKey || processKey;
 };
 
 const getClient = () => {
@@ -26,7 +28,6 @@ const getClient = () => {
   }
   return new GoogleGenAI({ apiKey });
 };
-
 // Define the structured schema for the response
 const similarProblemSchema: Schema = {
   type: Type.OBJECT,

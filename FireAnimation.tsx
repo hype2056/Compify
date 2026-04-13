@@ -6,7 +6,7 @@ interface FireAnimationProps {
 
 const FireAnimation: React.FC<FireAnimationProps> = ({ streak }) => {
   const getStreakColor = () => {
-    if (streak >= 15) return '#a855f7';
+    if (streak >= 14) return '#a855f7';
     if (streak >= 10) return '#22c55e';
     if (streak >= 5) return '#3b82f6';
     return '#ef4444';

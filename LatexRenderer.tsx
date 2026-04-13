@@ -9,23 +9,6 @@ const LatexRenderer: React.FC<LatexRendererProps> = ({ content, className }) => 
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const renderPlainText = (text: string) => {
-      const element = containerRef.current;
-      if (!element) return;
-      element.innerHTML = '';
-      const lines = text.split('\n');
-      lines.forEach((line, index) => {
-        element.appendChild(document.createTextNode(line));
-        if (index < lines.length - 1) {
-          element.appendChild(document.createElement('br'));
-        }
-      });
-    };
-    const normalizeDelimiters = (text: string) =>
-      text
-        .replace(/\\\[((?:.|\n)*?)\\\]/g, (_, equation) => `$$${equation}$$`)
-        .replace(/\\\((.*?)\\\)/g, (_, equation) => `$${equation}$`);
-
     const renderMath = (text: string) => {
         const element = containerRef.current;
         if (!element || !(window as any).katex) return;
@@ -34,7 +17,7 @@ const LatexRenderer: React.FC<LatexRendererProps> = ({ content, className }) => 
         element.innerHTML = '';
 
         // Split by $$ for blocks
-        const parts = normalizeDelimiters(text).split('$$');
+        const parts = text.split('$$');
         
         parts.forEach((part, index) => {
             if (index % 2 === 1) {
@@ -81,7 +64,6 @@ const LatexRenderer: React.FC<LatexRendererProps> = ({ content, className }) => 
     if ((window as any).katex) {
         renderMath(content);
     } else {
-        renderPlainText(content);
         // Retry logic for when script loads asynchronously
         const interval = setInterval(() => {
              if ((window as any).katex) {

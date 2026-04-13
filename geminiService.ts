@@ -1,60 +1,16 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { MathSolution, VerificationResult } from './types';
-type SolutionLike = Partial<MathSolution> & {
-  [key: string]: unknown;
-};
+import { MathSolution, VerificationResult } from '../types';
 
-type SimilarProblemLike = {
-  title?: unknown;
-  problemTitle?: unknown;
-  source?: unknown;
-  origin?: unknown;
-  problemText?: unknown;
-  problem_statement?: unknown;
-  problem?: unknown;
-  statement?: unknown;
-  similarityLogic?: unknown;
-  similarity?: unknown;
-  sharedConcept?: unknown;
-  concept?: unknown;
-  difficulty?: unknown;
-  level?: unknown;
-};
+// Initialize Gemini Client
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-const resolveApiKey = (): string | undefined => {
-  const metaEnv = (typeof import.meta !== 'undefined' ? import.meta.env : undefined) ?? {};
-  const viteKey =
-    metaEnv.VITE_GEMINI_API_KEY ||
-    metaEnv.VITE_API_KEY ||
-    metaEnv.GEMINI_API_KEY;
-  const processKey =
-    typeof process !== 'undefined' && process.env
-      ? process.env.API_KEY || process.env.GEMINI_API_KEY
-      : undefined;
-  const windowKey =
-    typeof window !== 'undefined' ? (window as typeof window & { GEMINI_API_KEY?: string }).GEMINI_API_KEY : undefined;
-  const storageKey =
-    typeof window !== 'undefined' ? window.localStorage.getItem('COMPIFY_GEMINI_API_KEY') ?? undefined : undefined;
-
-  return storageKey || windowKey || viteKey || processKey;
-};
-
-const getClient = () => {
-  const apiKey = resolveApiKey();
-  if (!apiKey) {
-    throw new Error(
-      'Missing Gemini API key. Set VITE_GEMINI_API_KEY (Vite) or GEMINI_API_KEY (runtime) before calling the API.'
-    );
-  }
-  return new GoogleGenAI({ apiKey });
-};
 // Define the structured schema for the response
 const similarProblemSchema: Schema = {
   type: Type.OBJECT,
   properties: {
     title: { type: Type.STRING, description: "A short title for the problem" },
     source: { type: Type.STRING, description: "The origin of the problem (e.g., AMC 12B 2021, Problem 15)" },
-    problemText: { type: Type.STRING, description: "The full, verbatim problem statement. Do not provide hints or solutions." },
+    problemText: { type: Type.STRING, description: "The full, verbatim problem statement." },
     similarityLogic: { type: Type.STRING, description: "Explain the shared mathematical concept, theorem, or trick (e.g., 'Both use Power of a Point') that makes this problem relevant." },
     difficulty: { type: Type.STRING, description: "Difficulty rating (e.g., 1-10 or Easy/Medium/Hard)" },
   },
@@ -91,7 +47,6 @@ export const solveMathProblem = async (
   base64Image?: string
 ): Promise<MathSolution> => {
   try {
-    const ai = getClient();
     const parts: any[] = [];
 
     if (base64Image) {
@@ -120,7 +75,7 @@ export const solveMathProblem = async (
       1. TRANSCRIPTION: If an image is provided, accurately transcribe the math notation using LaTeX.
       2. SOLUTION: Provide a rigorous, step-by-step solution. Ensure this field is NEVER empty. Explain every step clearly.
       3. RETRIEVAL: Retrieve 3 similar problems from the AOPS dataset.
-      For each similar problem, include the complete problem statement in problemText (no hints or solutions). If you cannot recall the exact statement, return "Problem statement unavailable." instead of leaving it blank.
+      
       Output strictly in JSON format matching the provided schema.
       `
     });
@@ -136,69 +91,7 @@ export const solveMathProblem = async (
     });
 
     if (!response.text) throw new Error("No response generated.");
-    const rawSolution = JSON.parse(response.text) as Partial<MathSolution> & {
-      [key: string]: unknown;
-    };
-
-    const normalizeText = (value: unknown, fallback: string) =>
-      typeof value === 'string' && value.trim() ? value : fallback;
-
-    const normalizeSimilarProblem = (problem: SimilarProblemLike) => ({
-      title: normalizeText(
-        (problem as SimilarProblemLike).title ?? (problem as SimilarProblemLike).problemTitle,
-        'Practice Problem'
-      ),
-      source: normalizeText(
-        (problem as SimilarProblemLike).source ?? (problem as SimilarProblemLike).origin,
-        'AOPS'
-      ),
-      problemText: normalizeText(
-        (problem as SimilarProblemLike).problemText ??
-          (problem as SimilarProblemLike).problem_statement ??
-          (problem as SimilarProblemLike).problem ??
-          (problem as SimilarProblemLike).statement,
-        'Problem statement unavailable.'
-      ),
-      similarityLogic: normalizeText(
-        (problem as SimilarProblemLike).similarityLogic ??
-          (problem as SimilarProblemLike).similarity ??
-          (problem as SimilarProblemLike).sharedConcept ??
-          (problem as SimilarProblemLike).concept,
-        'Related concept.'
-      ),
-      difficulty: normalizeText(
-        (problem as SimilarProblemLike).difficulty ?? (problem as SimilarProblemLike).level,
-        'Unknown'
-      ),
-    });
-
-    const similarProblemsInput = Array.isArray(rawSolution.similarProblems)
-      ? rawSolution.similarProblems
-      : [];
-
-    return {
-      originalProblemOCR: normalizeText(
-        (rawSolution as SolutionLike).originalProblemOCR ??
-          (rawSolution as SolutionLike).transcription,
-        ''
-      ),
-      stepByStepSolution: normalizeText(
-        (rawSolution as SolutionLike).stepByStepSolution ??
-          (rawSolution as SolutionLike).solution ??
-          (rawSolution as SolutionLike).stepByStep ??
-          (rawSolution as SolutionLike).proof,
-        'Solution unavailable.'
-      ),
-      finalAnswer: normalizeText(
-        (rawSolution as SolutionLike).finalAnswer ??
-          (rawSolution as SolutionLike).answer ??
-          (rawSolution as SolutionLike).final,
-        'Answer unavailable.'
-      ),
-      similarProblems: similarProblemsInput.map((problem) =>
-        normalizeSimilarProblem(problem as SimilarProblemLike)
-      ),
-    };
+    return JSON.parse(response.text) as MathSolution;
 
   } catch (error) {
     console.error("Error in solveMathProblem:", error);
@@ -211,7 +104,6 @@ export const verifySolution = async (
   userSolution: string
 ): Promise<VerificationResult> => {
   try {
-    const ai = getClient();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: {

@@ -4,12 +4,10 @@ import { solveMathProblem } from './geminiService';
 import LatexRenderer from './LatexRenderer';
 import ProblemCard from './ProblemCard';
 import PracticeModal from './PracticeModal';
-import FloatingSymbols from './FloatingSymbols';
-import FireAnimation from './FireAnimation';
-import {
-  PaperAirplaneIcon,
-  PhotoIcon,
-  CpuChipIcon,
+import { 
+  PaperAirplaneIcon, 
+  PhotoIcon, 
+  CpuChipIcon, 
   ArrowPathIcon,
   BeakerIcon,
   DocumentMagnifyingGlassIcon,
@@ -22,20 +20,7 @@ const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<SimilarProblem | null>(null);
-  const [sendAnim, setSendAnim] = useState<'idle' | 'flying' | 'returned'>('idle');
-  const [streak, setStreak] = useState(0);
-  const [apiKey, setApiKey] = useState(() =>
-    typeof window !== 'undefined' ? window.localStorage.getItem('COMPIFY_GEMINI_API_KEY') ?? '' : ''
-  );
-
-  const handleStreakUpdate = (correct: boolean) => {
-    if (correct) {
-      setStreak((prev) => prev + 1);
-    } else {
-      setStreak(0);
-    }
-  };
-
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -46,13 +31,6 @@ const App: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('COMPIFY_GEMINI_API_KEY', apiKey);
-      (window as typeof window & { GEMINI_API_KEY?: string }).GEMINI_API_KEY = apiKey || undefined;
-    }
-  }, [apiKey]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,13 +45,6 @@ const App: React.FC = () => {
 
   const handleSend = async () => {
     if ((!input.trim() && !image) || isLoading) return;
-
-    // Trigger fly animation
-    setSendAnim('flying');
-    setTimeout(() => {
-      setSendAnim('returned');
-      setTimeout(() => setSendAnim('idle'), 400);
-    }, 600);
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -93,24 +64,16 @@ const App: React.FC = () => {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: Sender.AI,
-        solution: {
-          ...solution,
-          originalProblemOCR:
-            solution.originalProblemOCR?.trim() ? solution.originalProblemOCR : userMessage.text,
-        },
+        solution: solution,
       };
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error(error);
-       const messageText =
-        error instanceof Error && error.message
-          ? error.message
-          : "I encountered an error solving this problem. Please try again with a clearer image or description.";
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: Sender.AI,
-        text: messageText,
+        text: "I encountered an error solving this problem. Please try again with a clearer image or description.",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -125,73 +88,56 @@ const App: React.FC = () => {
     }
   };
 
-  const sendBtnClass = sendAnim === 'flying' ? 'send-flying' : sendAnim === 'returned' ? 'send-returned' : '';
-
   return (
-    <div className="flex flex-col h-screen text-slate-100 font-sans overflow-hidden relative">
-      {/* Floating Math Symbols Background */}
-      <FloatingSymbols />
-
+    <div className="flex flex-col h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 glass-header z-10">
+      <header className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800 shadow-lg z-10">
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
+          <div className="bg-indigo-600 p-2 rounded-lg">
             <BeakerIcon className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold shimmer-text animate-glow">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
               Compify!
             </h1>
             <p className="text-xs text-slate-400">Powered by Gemini 3 Flash Preview & Agentic RAG</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden lg:flex items-center gap-2 glass px-3 py-1.5 rounded-full">
-            <span className="text-xs text-slate-400">Gemini API Key</span>
-            <input
-              type="password"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Paste key"
-              className="bg-transparent text-xs text-slate-100 placeholder-slate-500 focus:outline-none w-48"
-            />
-          </div>
-          <div className="flex items-center gap-2 text-xs font-medium text-emerald-400 glass px-3 py-1.5 rounded-full">
-             <CpuChipIcon className="w-4 h-4" />
-             <span>Thinking Mode: Active</span>
-          </div>
+        <div className="flex items-center gap-2 text-xs font-medium text-emerald-400 bg-emerald-950/30 px-3 py-1 rounded-full border border-emerald-900">
+           <CpuChipIcon className="w-4 h-4" />
+           <span>Thinking Mode: Active</span>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-hidden relative flex flex-col md:flex-row z-[1]">
-
+      <main className="flex-1 overflow-hidden relative flex flex-col md:flex-row">
+        
         {/* Chat / Solution Area */}
         <div className="flex-1 flex flex-col h-full relative">
-
+          
           {/* Scrollable Messages */}
           <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 scroller">
             {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full opacity-60 space-y-5">
-                <div className="w-28 h-28 rounded-2xl glass-strong flex items-center justify-center shadow-lg shadow-indigo-500/10">
-                  <AcademicCapIcon className="w-14 h-14 text-indigo-400" />
+              <div className="flex flex-col items-center justify-center h-full opacity-50 space-y-4">
+                <div className="w-24 h-24 rounded-full bg-slate-800 flex items-center justify-center animate-bounce-slow">
+                  <AcademicCapIcon className="w-12 h-12 text-slate-500" />
                 </div>
-                <h2 className="text-2xl font-bold shimmer-text">Ready to Compete?</h2>
-                <p className="text-center text-slate-400 max-w-md leading-relaxed">
-                  Upload a photo of a math competition problem or type it out.
+                <h2 className="text-2xl font-bold text-slate-300">Ready to Compete?</h2>
+                <p className="text-center text-slate-400 max-w-md">
+                  Upload a photo of a math competition problem or type it out. 
                   Compify! will visualize the proof and challenge you with similar problems.
                 </p>
               </div>
             )}
 
-            {messages.map((msg, msgIdx) => (
-              <div key={msg.id} className={`flex flex-col ${msg.sender === Sender.USER ? 'items-end' : 'items-start'} animate-slide-up`} style={{ animationDelay: `${msgIdx * 0.05}s` }}>
-
+            {messages.map((msg) => (
+              <div key={msg.id} className={`flex flex-col ${msg.sender === Sender.USER ? 'items-end' : 'items-start'}`}>
+                
                 {/* User Message Bubble */}
                 {msg.sender === Sender.USER && (
-                  <div className="glass-strong rounded-2xl rounded-tr-sm px-5 py-3 max-w-[80%] shadow-lg hover-glow transition-all duration-300">
+                  <div className="bg-slate-800 border border-slate-700 rounded-2xl rounded-tr-sm px-5 py-3 max-w-[80%] shadow-md">
                     {msg.image && (
-                      <img src={msg.image} alt="User upload" className="max-h-48 rounded-lg mb-3 border border-white/10" />
+                      <img src={msg.image} alt="User upload" className="max-h-48 rounded-lg mb-3 border border-slate-600" />
                     )}
                     {msg.text && <p className="text-slate-200 whitespace-pre-wrap">{msg.text}</p>}
                   </div>
@@ -200,20 +146,20 @@ const App: React.FC = () => {
                 {/* AI Response Area */}
                 {msg.sender === Sender.AI && msg.solution && (
                   <div className="w-full max-w-6xl mx-auto space-y-8 animate-fade-in">
-
+                    
                     {/* Solution Container */}
-                    <div className="glass-strong rounded-xl overflow-hidden shadow-2xl hover-glow transition-all duration-500">
-
-                      <div className="glass px-6 py-3 flex items-center gap-2" style={{ borderRadius: 0, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="bg-slate-900/80 border border-slate-700 rounded-xl overflow-hidden shadow-2xl">
+                      
+                      <div className="bg-slate-800/50 px-6 py-3 border-b border-slate-700 flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
                         <h2 className="font-semibold text-slate-200">Analysis & Solution</h2>
                       </div>
-
+                      
                       <div className="p-6 md:p-8 flex flex-col gap-6">
-
-                        {/* 1. OCR Section */}
+                        
+                        {/* 1. OCR Section (Only if exists) */}
                         {msg.solution.originalProblemOCR && (
-                           <div className="p-4 glass relative group">
+                           <div className="p-4 bg-slate-950 rounded-lg border border-slate-800/60 relative group">
                              <div className="flex items-center gap-2 mb-2 text-slate-500">
                                <DocumentMagnifyingGlassIcon className="w-4 h-4" />
                                <p className="text-xs uppercase tracking-wide font-bold">Transcription</p>
@@ -224,7 +170,7 @@ const App: React.FC = () => {
                            </div>
                         )}
 
-                        {/* 2. Main Solution */}
+                        {/* 2. Main Solution (Always visible) */}
                         <div className="prose prose-invert prose-lg max-w-none">
                            <div className="flex items-center gap-2 mb-4 text-indigo-400">
                                <AcademicCapIcon className="w-5 h-5" />
@@ -234,9 +180,9 @@ const App: React.FC = () => {
                         </div>
 
                         {/* 3. Final Answer */}
-                        <div className="mt-4 pt-6 border-t border-white/5 flex items-center justify-between">
+                        <div className="mt-4 pt-6 border-t border-slate-800 flex items-center justify-between">
                           <p className="text-sm text-slate-400 font-medium">Final Answer</p>
-                          <div className="px-8 py-4 glass rounded-xl text-2xl font-bold text-indigo-200 shadow-[0_0_30px_rgba(99,102,241,0.15)]">
+                          <div className="px-8 py-4 bg-gradient-to-r from-indigo-900/40 to-indigo-800/40 border border-indigo-500/50 rounded-xl text-2xl font-bold text-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.15)]">
                              <LatexRenderer content={msg.solution.finalAnswer} />
                           </div>
                         </div>
@@ -247,7 +193,7 @@ const App: React.FC = () => {
                     {/* Similar Problems Grid */}
                     <div>
                       <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-                        <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 shadow-lg shadow-amber-500/5">
+                        <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
                            <ArrowPathIcon className="w-5 h-5 text-amber-500" />
                         </div>
                         Challenge: Related AOPS Problems
@@ -255,9 +201,9 @@ const App: React.FC = () => {
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {msg.solution.similarProblems.map((prob, idx) => (
-                          <ProblemCard
-                            key={idx}
-                            problem={prob}
+                          <ProblemCard 
+                            key={idx} 
+                            problem={prob} 
                             index={idx}
                             onClick={setSelectedProblem}
                           />
@@ -267,31 +213,26 @@ const App: React.FC = () => {
 
                   </div>
                 )}
-
+                
                 {msg.sender === Sender.AI && msg.text && (
-                  <div className="glass px-4 py-3 text-red-200">
+                  <div className="bg-red-900/20 border border-red-800 text-red-200 px-4 py-3 rounded-xl">
                     {msg.text}
                   </div>
                 )}
 
               </div>
             ))}
-
+            
             {/* Loading Indicator */}
             {isLoading && (
-              <div className="flex items-start max-w-md animate-slide-up">
-                <div className="glass-strong rounded-xl px-6 py-5 flex items-center gap-4 shadow-lg">
+              <div className="flex items-start animate-pulse max-w-md">
+                <div className="bg-slate-900 border border-slate-800 rounded-xl px-6 py-5 flex items-center gap-4 shadow-lg">
                   <div className="relative w-6 h-6">
                     <div className="absolute inset-0 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
                     <div className="absolute inset-2 bg-indigo-500 rounded-full animate-pulse"></div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-indigo-300 flex items-center gap-1">
-                      Compify! is thinking
-                      <span className="thinking-dot inline-block w-1 h-1 bg-indigo-400 rounded-full"></span>
-                      <span className="thinking-dot inline-block w-1 h-1 bg-indigo-400 rounded-full"></span>
-                      <span className="thinking-dot inline-block w-1 h-1 bg-indigo-400 rounded-full"></span>
-                    </p>
+                    <p className="text-sm font-bold text-indigo-300">Compify! is thinking...</p>
                     <p className="text-xs text-slate-500">Scanning AOPS dataset & verifying logic</p>
                   </div>
                 </div>
@@ -302,12 +243,12 @@ const App: React.FC = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 glass-input z-20">
+          <div className="p-4 bg-slate-900/80 border-t border-slate-800 backdrop-blur-md z-20">
             <div className="max-w-4xl mx-auto flex flex-col gap-3">
               {image && (
-                <div className="relative inline-block w-fit group animate-slide-up">
-                  <img src={image} alt="Preview" className="h-20 rounded-lg border border-white/10 opacity-80" />
-                  <button
+                <div className="relative inline-block w-fit group animate-in fade-in slide-in-from-bottom-2">
+                  <img src={image} alt="Preview" className="h-20 rounded-lg border border-slate-600 opacity-80" />
+                  <button 
                     onClick={() => setImage(null)}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:bg-red-600 transition-colors"
                   >
@@ -315,47 +256,38 @@ const App: React.FC = () => {
                   </button>
                 </div>
               )}
-
-              <div className="flex gap-3 items-center">
-                 <FireAnimation streak={streak} />
-                 <input
-                  type="file"
-                  ref={fileInputRef}
-                  accept="image/*"
-                  className="hidden"
+              
+              <div className="flex gap-3">
+                 <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  accept="image/*" 
+                  className="hidden" 
                   onChange={handleImageUpload}
                 />
-                <button
+                <button 
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-3 text-slate-400 hover:text-indigo-400 glass-btn"
+                  className="p-3 text-slate-400 hover:text-indigo-400 hover:bg-slate-800/80 rounded-xl transition-all border border-transparent hover:border-slate-700"
                   title="Upload Image"
                 >
-                  <PhotoIcon className="w-6 h-6 relative z-10" />
+                  <PhotoIcon className="w-6 h-6" />
                 </button>
                 <div className="flex-1 relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/30 to-cyan-500/30 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
                   <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Type a math problem or upload an image..."
-                    className="relative w-full text-slate-200 placeholder-slate-500 py-3 pl-4 pr-14 focus:ring-1 focus:ring-indigo-500/50 resize-none h-[52px] leading-[28px]"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(20px) saturate(150%)',
-                      WebkitBackdropFilter: 'blur(20px) saturate(150%)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      borderRadius: '16px',
-                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                    }}
+                    className="relative w-full bg-slate-800 border-none text-slate-200 placeholder-slate-500 rounded-xl py-3 pl-4 pr-12 focus:ring-1 focus:ring-indigo-500/50 resize-none h-[52px] leading-[28px] shadow-inner"
                     rows={1}
                   />
-                  <button
+                  <button 
                     onClick={handleSend}
                     disabled={isLoading || (!input && !image)}
-                    className={`absolute right-2 top-1.5 p-2.5 glass-btn text-white ${sendBtnClass}`}
+                    className="absolute right-2 top-1.5 p-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95"
                   >
-                    <PaperAirplaneIcon className="w-5 h-5 relative z-10 plane-icon" />
+                    <PaperAirplaneIcon className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -367,10 +299,9 @@ const App: React.FC = () => {
 
       {/* Practice Modal Overlay */}
       {selectedProblem && (
-        <PracticeModal
-          problem={selectedProblem}
-          onClose={() => setSelectedProblem(null)}
-          onResult={handleStreakUpdate}
+        <PracticeModal 
+          problem={selectedProblem} 
+          onClose={() => setSelectedProblem(null)} 
         />
       )}
 
